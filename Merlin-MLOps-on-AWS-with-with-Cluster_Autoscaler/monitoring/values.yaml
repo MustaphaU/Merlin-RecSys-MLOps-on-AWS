@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Copyright (c) 2021 NVIDIA Corporation. All Rights Reserved.
+# Modified by Mustapha Unubi Momoh for EKS deployment
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
+replicaCount: 1
+
+image:
+  repository: nginx #will be replaced by the actual monitoring image
+  pullPolicy: Always
+
+#other parameters
+aws_region: "us-east-1"
+pipeline_id: "1234567890abcdef"
+s3_bucket: "aws-nvidia-recsys"
+local_data_dir: "/var/lib/data"
+sqs_queue_url: "https://sqs.us-east-1.amazonaws.com/123456789012/your-queue-name"
+aws_account_id: "123456789012"
+data_dir: "initial_training_parquet_path_in_s3"
+new_data_dir: "new_data_parquet_path_in_s3_for_live_uploader"
+do_data_validation: "False"
+service_account: "default"

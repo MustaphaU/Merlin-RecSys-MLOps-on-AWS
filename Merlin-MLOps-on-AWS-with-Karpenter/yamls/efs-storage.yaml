@@ -1,0 +1,22 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap         # dynamic access points
+  fileSystemId: FSID_REPLACE_ME
+  directoryPerms: "777"
+mountOptions:
+  - tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-cluster-pvc
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 100Gi

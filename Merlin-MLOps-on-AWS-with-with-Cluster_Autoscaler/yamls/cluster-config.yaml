@@ -1,0 +1,48 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: my-merlin-cluster
+  region: us-east-1
+  version: "1.34"
+
+iam: 
+  withOIDC: true
+managedNodeGroups:
+  - name: gpu-node-group
+    instanceType: g5.xlarge
+    amiFamily: Ubuntu2404
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 3
+    volumeSize: 100
+    taints:
+      - key: nvidia.com/gpu
+        value: "present"
+        effect: NoSchedule
+    labels:
+      hardware-type: gpu
+      nodegroup: gpu-node-group
+      k8s.amazonaws.com/accelerator: nvidia-tesla-a10g
+    ssh:
+      allow: true
+      publicKeyPath: ~/.ssh/id_rsa.pub
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/my-merlin-cluster: "owned"
+  
+  - name: cpu-node-group
+    instanceType: m5.xlarge
+    amiFamily: Ubuntu2404
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 3
+    volumeSize: 50
+    labels:
+      hardware-type: cpu
+      nodegroup: cpu-node-group
+    ssh:
+      allow: true
+      publicKeyPath: ~/.ssh/id_rsa.pub
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/my-merlin-cluster: "owned"

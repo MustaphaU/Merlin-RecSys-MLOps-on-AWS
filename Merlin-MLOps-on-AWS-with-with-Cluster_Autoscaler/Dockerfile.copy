@@ -1,0 +1,44 @@
+# Copyright (c) 2021 NVIDIA Corporation. All Rights Reserved.
+# Modified for Amazon EKS Deployment by Mustapha Unubi Momoh
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
+
+# this container handles data extraction (S3) and Triton deployment (Helm)
+FROM amazon/aws-cli:2.33.12
+
+RUN dnf -y update && \
+    dnf -y install bash python3-pip vim tar gzip openssl && \
+    dnf clean all
+
+ENV KUBECTL_VERSION=v1.34.0
+
+RUN curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+    install -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
+
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+ && chmod 700 get_helm.sh \
+ && bash get_helm.sh \
+ && rm get_helm.sh
+
+RUN pip3 install --no-cache-dir kfp
+
+COPY data-extraction/run_copy_merlin_aws.sh /script/run_copy_merlin_aws.sh
+COPY inference/ /script/inference/
+
+RUN chmod +x /script/run_copy_merlin_aws.sh && \
+    find /script/inference -name "*.sh" -exec chmod +x {} \;
+
+WORKDIR /script
