@@ -4,26 +4,25 @@
 ## Follow these steps to set up the infrastructure and deploy the recommender system:
 
 Steps 1 through 7 sets up karpenter and creates the nodepools. The instructions (1 - 7) were lifted/ adapted from: https://karpenter.sh/docs/getting-started/getting-started-with-karpenter/
-### 1. [Create a cluster and add Karpenter](https://karpenter.sh/docs/getting-started/getting-started-with-karpenter/): 
-* Set environment variables
-    ```bash
-    export KARPENTER_NAMESPACE="kube-system"
-    export KARPENTER_VERSION="1.9.0"
-    export K8S_VERSION="1.34"
-    export CLUSTER="${USER}-merlin-cluster"
-    ```
+### 1. Set environment variables
+```bash
+export KARPENTER_NAMESPACE="kube-system"
+export KARPENTER_VERSION="1.9.0"
+export K8S_VERSION="1.34"
+export CLUSTER="${USER}-merlin-cluster"
+```
 
-* Also, set the follow env variables:  
+AND  
 
-    ```bash
-    export AWS_PARTITION="aws" # AWS has multiple partitions for different regions and compliance requirements. aws/aws-cn/aws-us-gov.
-    export AWS_DEFAULT_REGION="us-east-1"
-    export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-    export TEMPOUT="$(mktemp)"
-    export UBUNTU_AMI_ID="$(aws ssm get-parameter \
-    --name "/aws/service/canonical/ubuntu/eks/24.04/${K8S_VERSION}/stable/current/amd64/hvm/ebs-gp3/ami-id" \
-    --query Parameter.Value --output text)"
-    ```
+```bash
+export AWS_PARTITION="aws" # AWS has multiple partitions for different regions and compliance requirements. aws/aws-cn/aws-us-gov.
+export AWS_DEFAULT_REGION="us-east-1"
+export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+export TEMPOUT="$(mktemp)"
+export UBUNTU_AMI_ID="$(aws ssm get-parameter \
+--name "/aws/service/canonical/ubuntu/eks/24.04/${K8S_VERSION}/stable/current/amd64/hvm/ebs-gp3/ami-id" \
+--query Parameter.Value --output text)"
+```
 
 ### 2. Create a cluster
 The configuration will:
