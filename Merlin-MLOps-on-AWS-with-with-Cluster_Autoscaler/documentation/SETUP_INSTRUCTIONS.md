@@ -1,5 +1,5 @@
 # Deploying a Recommender System with Continuous Retraining on Amazon EKS
-*Autoscaling with Kubernetes Cluster Autoscaler and Kubernetes Horizontal Autoscaler*
+*Autoscaling with Kubernetes Cluster Autoscaler and Kubernetes Horizontal Pod Autoscaler*
 
 
 ## Follow these steps to set up the infrastructure and deploy the recommender system:
