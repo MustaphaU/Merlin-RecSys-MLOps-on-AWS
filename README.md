@@ -16,11 +16,11 @@ This project is a deep learning based recommender system with continuous retrain
 ## Deployment Instructions
 There are two variants of this project based on the autoscaling product. 
 1. ### **Autoscaling with Karpenter (self-managed) and Horizontal Pod Autoscaler**  
-    Triton pods are scaled using Kubernetes HPA with Custom metrics and the Cluster Nodes are managed/scaled by Karpenter. The codes are in the directory [Merlin-MLOps-on-AWS-with-Karpenter](Merlin-MLOps-on-AWS-with-Karpenter), also visit [SETUP_INSTRUCTIONS](Merlin-MLOps-on-AWS-with-Karpenter/documentation/setup_instructions.md) for instructions on how to set up the infrastructure and deploy the recommender system.
+    Triton pods are scaled using Kubernetes HPA with Custom metrics and the Cluster Nodes are managed/scaled by Karpenter. You can find the code in this [Merlin-MLOps-on-AWS-with-Karpenter](Merlin-MLOps-on-AWS-with-Karpenter), also visit [SETUP_INSTRUCTIONS](Merlin-MLOps-on-AWS-with-Karpenter/documentation/setup_instructions.md) for instructions on how to set up the infrastructure and deploy the recommender system.
     ![Autoscaling with Karpenter and k8s HPA](images/Karpenter_autoscaling.png)
 
 2. ### **Autoscaling with Cluster Autoscaler and Horizontal Pod Autoscaler (HPA)**  
-    Triton pods are scaled using the Kubernetes HPA with Custom metrics and Cluster nodes are scaled by Cluster Autoscaler. The codes are in the directory [Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler](Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler), also visit [SETUP_INSTRUCTIONS](Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler/documentation/SETUP_INSTRUCTIONS.md) for instructions on how to set up the infrastructure and deploy the recommender system.
+    Triton pods are scaled using the Kubernetes HPA with Custom metrics and Cluster nodes are scaled by Cluster Autoscaler. You can find the code in this directory [Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler](Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler), also visit [SETUP_INSTRUCTIONS](Merlin-MLOps-on-AWS-with-with-Cluster_Autoscaler/documentation/SETUP_INSTRUCTIONS.md) for instructions on how to set up the infrastructure and deploy the recommender system.
     ![Autoscaling with Cluster Autoscaler and k8s HPA](images/Cluster_Autoscaling.png)
 
 ## Acknowledgements
