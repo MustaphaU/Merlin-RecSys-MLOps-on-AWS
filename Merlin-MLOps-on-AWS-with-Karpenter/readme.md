@@ -15,7 +15,7 @@ This project is a deep learning based recommender system with continuous retrain
 
 * [Karpenter](https://karpenter.sh/) is an open source software application that launches and terminates compute resources in a Kubernetes cluster to handle changes in workload demands.
 
-## Autoscaling with Karpenter (self-managed) and Horizontal Pod Autoscaler**  
+## Autoscaling with Karpenter (self-managed) and Horizontal Pod Autoscaler 
 Triton pods in this infrastructure are scaled using Kubernetes HPA with Custom metrics and the Cluster Nodes are managed/scaled by Karpenter.
 
 ![Autoscaling with Karpenter and k8s HPA](static/Karpenter_autoscaling.png)
@@ -24,7 +24,7 @@ Triton pods in this infrastructure are scaled using Kubernetes HPA with Custom m
 Please visit *[setup instructions](documentation/setup_instructions.md)* to deploy in your AWS account.
 
 ## Acknowledgements:
-This work has been inspired by [Merlin MLOps with Kubeflow Pipelines on Google Kubernetes Engine](https://developer.nvidia.com/blog/continuously-improving-recommender-systems-for-competitive-advantage-with-merlin-and-mlops/); in fact, it is an adaptation of the [Merlin - MLOps on GKE project on GitHub](https://github.com/NVIDIA-Merlin/gcp-ml-ops?tab=readme-ov-file#merlin---mlops-on-gke) for deployment on Amazon EKS. Therefore, you will find that some of the ideas in the referenced project are replicated in this implementation and most of the code has been reused but updated to use AWS and to work with updated SDKs.
+This work was inspired by [Merlin MLOps with Kubeflow Pipelines on Google Kubernetes Engine](https://developer.nvidia.com/blog/continuously-improving-recommender-systems-for-competitive-advantage-with-merlin-and-mlops/); in fact, it is an adaptation of the [Merlin - MLOps on GKE project on GitHub](https://github.com/NVIDIA-Merlin/gcp-ml-ops?tab=readme-ov-file#merlin---mlops-on-gke) for deployment on Amazon EKS. Therefore, you will find that some of the ideas in the referenced project are replicated in this implementation and most of the code has been reused but updated to use AWS and to work with updated SDKs.
 
 ## References:
 
