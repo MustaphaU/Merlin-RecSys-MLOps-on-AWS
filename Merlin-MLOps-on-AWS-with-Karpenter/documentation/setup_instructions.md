@@ -3,7 +3,7 @@
 
 ## Follow these steps to set up the infrastructure and deploy the recommender system:
 
-Steps 1 through 7 sets up karpenter and creates the nodepools. The instructions (1 - 7) were lifted/ adapted from: https://karpenter.sh/docs/getting-started/getting-started-with-karpenter/
+Steps 1 through 5 sets up karpenter, creates the EKS cluster and nodepools. The instructions (1 - 5) were lifted/ adapted from: https://karpenter.sh/docs/getting-started/getting-started-with-karpenter/
 ### 1. Set environment variables
 ```bash
 export KARPENTER_NAMESPACE="kube-system"
@@ -35,7 +35,7 @@ The configuration will:
 * Run Helm to install Karpenter.
 
 
-### 3.  Download Karpenter AWS CloudFormation template for the specified Karpenter version and save it to a temporary file, then deploy the CloudFormation to AWS
+* Download Karpenter AWS CloudFormation template for the specified Karpenter version and save it to a temporary file, then deploy the CloudFormation to AWS
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aws/karpenter-provider-aws/v"${KARPENTER_VERSION}"/website/content/en/preview/getting-started/getting-started-with-karpenter/cloudformation.yaml  > "${TEMPOUT}" \
@@ -46,7 +46,7 @@ curl -fsSL https://raw.githubusercontent.com/aws/karpenter-provider-aws/v"${KARP
 --parameter-overrides "ClusterName=${CLUSTER}"
 ```
 
-### 4.  Set up the cluster metadata, configure IAM with OIDC and associate Karpenter service account with the necessary IAM roles and policies, map the Karpenter node role for EC2 instances with Kubernetes node groups, create managed node group for initial cluster nodes, install `eks-pod-identity-agent` addon.
+* Set up the cluster metadata, configure IAM with OIDC and associate Karpenter service account with the necessary IAM roles and policies, map the Karpenter node role for EC2 instances with Kubernetes node groups, create managed node group for initial cluster nodes, install `eks-pod-identity-agent` addon.
 
 ```bash
 eksctl create cluster -f - <<EOF
@@ -96,7 +96,7 @@ addons:
 EOF
 ```
 
-### 5.  Store the cluster endpoint, ARN of the Karpenter IAM role, and print both values.
+### 3.  Store the cluster endpoint, ARN of the Karpenter IAM role, and print both values.
 
 ```bash
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name "${CLUSTER}" --query "cluster.endpoint" --output text)"
@@ -105,7 +105,7 @@ export KARPENTER_IAM_ROLE_ARN="arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/
 echo "${CLUSTER_ENDPOINT} ${KARPENTER_IAM_ROLE_ARN}"
 ```
 
-### 6. Install Karpenter  
+### 4. Install Karpenter  
 
 ```bash
 # Logout of helm registry to perform an unauthenticated pull against the public ECR
@@ -121,7 +121,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter --vers
 --wait
 ```
 
-### 7. Create Nodepools   
+### 5. Create Nodepools   
 * CPU nodepool:   
 (m5.xlarge, t3.xlarge) -> you can adjust these based on your needs)  
 The `consolidationPolicy` set to `WhenEmptyOrUnderutilized` in the `disruption` block configures Karpenter to reduce cluster cost by removing and replacing nodes. As a result, consolidation will terminate any empty nodes on the cluster. This behavior can be disabled by setting `consolidateAfter` to `Never`, telling Karpenter that it should never consolidate nodes.  
@@ -259,7 +259,7 @@ The `consolidationPolicy` set to `WhenEmptyOrUnderutilized` in the `disruption` 
     EOF
     ```
 
-### 8. Install NVIDIA GPU Operator
+### 6. Install NVIDIA GPU Operator
 
 * Install the helm cli (or SKIP if you alreadly have the helm cli):
     ```bash
@@ -342,7 +342,7 @@ iii. check logs: `kubectl logs nvidia-smi-pod`
 iv. delete pod: `kubectl delete -f cuda-vectoradd.yaml`
 
 
-### 9. Add the EFS CSI Driver addon
+### 7. Add the EFS CSI Driver addon
 * Find the EFS CSI driver version compatible with your platform version
     ```bash
     aws eks describe-addon-versions --addon-name aws-efs-csi-driver
@@ -372,7 +372,7 @@ iv. delete pod: `kubectl delete -f cuda-vectoradd.yaml`
     --service-account-role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/${role_name} --force
     ```
 
-### 10. [Install EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
+### 8. [Install EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
 
 * Find the driver version compatible with your platform version
     ```bash
@@ -403,7 +403,7 @@ kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.ku
 ```
 Why EBS: Some core Kubeflow components need **exclusive** *not* shared storage  (e.g. databases and metadata). EBS is preferred for single pod access.
 
-### 11. [Install Kubeflow Pipelines (Standalone deployment *not* Full)](https://docs.aws.amazon.com/sagemaker/latest/dg/kubernetes-sagemaker-components-install.html#kubeflow-pipelines-standalone)  
+### 9. [Install Kubeflow Pipelines (Standalone deployment *not* Full)](https://docs.aws.amazon.com/sagemaker/latest/dg/kubernetes-sagemaker-components-install.html#kubeflow-pipelines-standalone)  
 
 I skipped the step *creating a gateway node* because I have a machine that can:  
 
@@ -433,7 +433,7 @@ ii. access the Kubeflow pipelines UI
     ```
 - Open http://localhost:8080 on your browser to access the Kubeflow Pipelines UI.
 
-### 12. [Create the Elastic file system (EFS)](https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/docs/efs-create-filesystem.md)
+### 10. [Create the Elastic file system (EFS)](https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/docs/efs-create-filesystem.md)
 a. Where is the cluster?
 
 * `VPC_ID`: Get the virtual network the cluster lives in.
@@ -554,7 +554,7 @@ output like:
 +----------+------------------+--------------------------+------------+----------------------------+
 ```
 
-### 13. Create the storage class and persistent volume claim. CSI dynamic provisioning creates PV automatically (reason for efs-ap provisioning mode).  
+### 11. Create the storage class and persistent volume claim. CSI dynamic provisioning creates PV automatically (reason for efs-ap provisioning mode).  
 * create yaml file: *efs-storage.yaml*
     ```yaml
     apiVersion: storage.k8s.io/v1
@@ -612,7 +612,7 @@ output like:
     ```bash
     kubectl delete pod efs-test -n kubeflow
     ```
-### 14. Create a Service Account and RBAC Role for Pipeline Components to Access Helm and Deploy pods, etc.
+### 12. Create a Service Account and RBAC Role for Pipeline Components to Access Helm and Deploy pods, etc.
 The data extraction and preprocess-train components need permission to check Helm release status for Triton (`triton_status=$(helm status triton 2>&1)`).   
 **Note:** the RBAC permissions in the Role apply to all pods, services, deployments and replicasets in the `kubeflow` namespace. Any pod or component using the `merlin-kfp-sa` service account will have these permissions for those resource types.
 ```bash
@@ -670,7 +670,7 @@ kubectl get role merlin-kfp-role -n kubeflow
 kubectl get rolebinding merlin-kfp-binding -n kubeflow
 ```
 
-### 15. Upload training data to S3 bucket: you need at least two files -- at least one for training and one for validation
+### 13. Upload training data to S3 bucket: you need at least two files -- at least one for training and one for validation
 
 * create the bucket
     ```bash
@@ -695,7 +695,7 @@ kubectl get rolebinding merlin-kfp-binding -n kubeflow
 Note: `day_0.parquet`and `day_1.parquet` are randomly sampled subsets from one day of the [Criteo 1TB Click Logs dataset](https://ailab.criteo.com/download-criteo-1tb-click-logs-dataset/) that have been converted to parquet files using this [Notebook](https://github.com/NVIDIA-Merlin/NVTabular/blob/v0.7.1-docs/examples/scaling-criteo/01-Download-Convert.ipynb) 
  In the initial training run, `day_0.parquet` and `day_1.parquet` are the train and valid datasets, repectively.
 
-### 16. Create the SQS queue. 
+### 14. Create the SQS queue. 
 Ensure to replace `QUEUE_NAME` with your desired name, e.g., `merlin-inference-requests`
 ```bash
 export QUEUE_NAME='merlin-inference-requests' #please replace
@@ -719,7 +719,7 @@ echo "QUEUE_ARN: $QUEUE_ARN"
 ```
 Please save the QUEUE_URL, you are going to need it later.
 
-### 17. Create the policies for S3 and SQS access.
+### 15. Create the policies for S3 and SQS access.
 * S3 bucket access policy
 ```bash
 cat > s3-full-${BUCKET}.json <<EOF
@@ -764,7 +764,7 @@ aws iam create-policy \
 ```
 
 
-### 18. Update the service account with an IAM role for S3 & SQS access.
+### 16. Update the service account with an IAM role for S3 & SQS access.
 * First, create the IAM role with the S3/SQS access policies attached. Ensure not to override the existing service account (merlin-kfp-sa) by using the --role-only flag.
     ```bash
     export NAMESPACE=kubeflow
@@ -792,7 +792,7 @@ aws iam create-policy \
     --overwrite
     ```
 
-### 19. Install Prometheus and Grafana
+### 17. Install Prometheus and Grafana
 * Install the kube-prometheus-stack which includes Prometheus Operator, Prometheus, and Grafana.
     ```bash
     export GRAFANA_ADMIN_USERNAME=yourusernameREPLACE # replace
@@ -834,7 +834,7 @@ aws iam create-policy \
     # Open http://localhost:3000 (admin/admin)
     ```
 
-### 20. Build and push containers to ECR
+### 18. Build and push containers to ECR
 #### a. Data extraction & Triton deployment container:  
 * navigate to the project root, then run the scripts below (ensure to replace `AWS_ACCOUNT_ID` and `REGION`):
     ```bash
@@ -878,7 +878,7 @@ aws iam create-policy \
     ./build_monitoring_container_aws.sh AWS_ACCOUNT_ID REGION
     ```
 
-### 21. Tag the shared node security group (SG) so Kubernetes LoadBalancer can identify the SG of the cluster. 
+### 19. Tag the shared node security group (SG) so Kubernetes LoadBalancer can identify the SG of the cluster. 
 The Cluster nodes currently have multiple SGs attached. Without the Kubernetes cluster tag, the controller can't safely choose the correct SG when creating the LoadBalancer, so it fails with "Multiple untagged security groups found.."
 * find the worker-node shared SG
     ```bash
@@ -906,7 +906,7 @@ aws ec2 describe-security-groups \
   --group-ids "$NODE_SG" \
   --query 'SecurityGroups[0].Tags'
 ```
-### 22. Deploy the Horizontal Pod Autoscaler
+### 20. Deploy the Horizontal Pod Autoscaler
 The YAML files are located in the [scaling_yamls](../scaling_yamls) directory
 * create the `custom-metrics` namespace. Some of the the manifests reference this namespace; the namedspaced resources including ConfigMap, Deployment, ServiceAccount, Service will fail to create without it.
 
@@ -946,7 +946,7 @@ The YAML files are located in the [scaling_yamls](../scaling_yamls) directory
 
 
 
-### 23. Compile Kubeflow Pipeline
+### 21. Compile Kubeflow Pipeline
 * start by installing the kubeflow pipelines SDK (`kfp`) and `kfp-kubernetes` on your gateway node.
     * create a conda environment and activate it
         ```bash
@@ -987,7 +987,7 @@ Enter the service account name we created earlier, e.g.,`merlin-kfp-sa` in the "
 * The pipeline components are executed sequentially as shown in the DAG, from data-extraction to monitoring. You can click on the Logs tab in the UI to view the log of a component. 
     ![Kubeflow UI showing a completed run and logs](../static/preprocess_train_log_from_kubeflow.png)
 
-### 24. Test the Performance Monitor.
+### 22. Test the Performance Monitor.
 * Once the pipeline run in previous step completes, you can test the monitoring module by sending inference requests using the sample python app [performance-test.py](client_app/performance-test.py):
     - Ensure to start the app in an environment with `tritonclient` installed. I would recommend running it inside a container like: `nvcr.io/nvidia/merlin/merlin-inference:0.5.1`. Replace the placeholders in the sample command below.
     
