@@ -743,12 +743,13 @@ helm upgrade cluster-autoscaler autoscaler/cluster-autoscaler \
 ```
 
 ### 17. Deploy the Horizontal Pod Autoscaler
+The YAML files are located in the [scaling_yamls](../scaling_yamls) directory.
 * create the `custom-metrics` namespace. Some of the the manifests reference this namespace; the namedspaced resources including ConfigMap, Deployment, ServiceAccount, Service will fail to create without it.
 
     ```bash
     kubectl create namespace custom-metrics
     ```
-* apply [custom-metric-server-config.yaml](scaling_yamls/custom-metric-server-config.yaml)
+* apply [custom-metric-server-config.yaml](../scaling_yamls/custom-metric-server-config.yaml)
     ```bash
     kubectl apply -f custom-metric-server-config.yaml
     ```
@@ -758,13 +759,13 @@ helm upgrade cluster-autoscaler autoscaler/cluster-autoscaler \
 
     - **`avg_time_queue_ms`** = `'avg(delta(nv_inference_queue_duration_us{<<.LabelMatchers>>}[30s])/(1+delta(nv_inference_request_success{<<.LabelMatchers>>}[30s]))/1000) by (<<.GroupBy>>)'` and exposes this `avg_time_queue_ms`to HPA.
 
-* apply [custom-metric-server-rbac.yaml](scaling_yamls/custom-metrics-server-rbac.yaml): role-based access control (RBAC) 
+* apply [custom-metric-server-rbac.yaml](../scaling_yamls/custom-metrics-server-rbac.yaml): role-based access control (RBAC) 
     ```bash
     kubectl apply -f custom-metric-server-rbac.yaml
     ```
     - allows custom metrics adapter to read kubernetes resources and auth config; allows HPA controller to read custom metrics API.
 
-* apply [custom-metric-server.yaml](scaling_yamls/custom-metric-server.yaml)
+* apply [custom-metric-server.yaml](../scaling_yamls/custom-metric-server.yaml)
     ```bash
     kubectl apply -f custom-metric-server.yaml
     ```
@@ -773,7 +774,7 @@ helm upgrade cluster-autoscaler autoscaler/cluster-autoscaler \
     - mounts the adapter config deployed earlier.
     - registers APIService custom.metrics.k8s.io so Kubernetes/HPA can query it.
 
-* apply [triton-hpa.yaml](scaling_yamls/triton-hpa.yaml)
+* apply [triton-hpa.yaml](../scaling_yamls/triton-hpa.yaml)
     ```bash
     kubectl apply -f triton-hpa.yaml
     ```
@@ -818,13 +819,15 @@ Enter the service account name we created earlier, e.g.,`merlin-sa` in the "Serv
 * Fill out all other fields and hit Start:   
     ![Kubeflow UI showing the create run page](../static/pipeline_run_UI.png)
 
+* The pipeline components are executed sequentially as shown in the DAG, from data-extraction to monitoring. You can click on the Logs tab in the UI to view the log of a component. 
+    ![Kubeflow UI showing a completed run and logs](../static/preprocess_train_log_from_kubeflow.png)
 
 ### 19. Test the performance monitor.
 * Once the pipeline run in previous step completes, you test the monitoring module by sending inference requests using the sample python app [performance-test.py](client_app/performance-test.py):
     - Ensure to start the app in an environment with `tritonclient` installed. I would recommend running inside a  container like: `nvcr.io/nvidia/merlin/merlin-inference:0.5.1`. Replace the placeholders in the sample command below.
 
         ```sh
-        !python3 performance-test.py \
+        python3 performance-test.py \
             --triton_grpc_url <LOAD_BALANCER_URL>:8001 \
             --model_name hugectr_dcn_ens \
             --test_data day_1.parquet \
@@ -833,6 +836,16 @@ Enter the service account name we created earlier, e.g.,`merlin-sa` in the "Serv
             --queue_url <SQS_URL> \
             --verbose False
         ```
+
+    - Once drift is detected, a new pipeline run that performs incremental training is triggered. This triggered run executes the complete pipeline tasks as before; however, training is warm-started from previous model checkpoints, and only the new training data is used. See the screenshots of from a drift-triggered run below:
+
+        ![Kubeflow UI showing triggered run start](../static/triggered_run_edit.png)
+
+        AND  
+
+        The tasks are executed starting from data-extraction:
+
+        ![Triggered run executing tasks](../static/triggered_tasks.png)
 
 
 
