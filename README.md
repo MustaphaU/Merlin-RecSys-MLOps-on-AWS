@@ -13,6 +13,10 @@ This project is a deep learning based recommender system with continuous retrain
 
 * [Kubeflow Pipelines](https://www.kubeflow.org/docs/components/pipelines/overview/) (KFP) is an open source platform for writing machine learning workflows natively in Python and deploying them on Kubernetes-based systems.
 
+
+## About the Project
+You can learn more about this project from this blog post: https://mustaphaunubi.medium.com/building-a-recommender-system-with-continuous-retraining-on-amazon-eks-with-nvidia-merlin-hugectr-5b734c71bbc5
+
 ## Deployment Instructions
 There are two variants of this project based on the autoscaling product. 
 1. ### **Autoscaling with Karpenter (self-managed) and Horizontal Pod Autoscaler**  
