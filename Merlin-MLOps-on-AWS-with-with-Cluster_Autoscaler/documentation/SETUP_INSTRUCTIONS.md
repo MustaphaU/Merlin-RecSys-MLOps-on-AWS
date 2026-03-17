@@ -12,7 +12,7 @@ export CLUSTER=my-merlin-cluster
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
-### 2. Create the cluster (adjust desired capacity) 
+### 2. Create the cluster (adjust desired capacities in each node group as needed. Keep maxSize >= 2) 
 * create cluster-config.yaml file.
     ```yaml
     apiVersion: eksctl.io/v1alpha5
