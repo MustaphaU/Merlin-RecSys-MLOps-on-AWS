@@ -287,9 +287,8 @@ helm install --wait --generate-name \
 ```
 
 * To confirm driver installation, create a pod and run `nvidia-smi` inside the pod (a container):  
-i. create cuda-vectoradd.yaml  
-
 ```bash
+kubectl apply -f - <<'EOF'
 apiVersion: v1
 kind: Pod
 metadata:
@@ -297,20 +296,20 @@ metadata:
 spec:
   restartPolicy: Never
   tolerations:
-  - key: "nvidia.com/gpu"
-    operator: "Exists"
-    effect: "NoSchedule"
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
   containers:
-  - name: nvidia-smi
-    image: nvidia/cuda:12.2.0-base-ubuntu22.04
-    command: ["nvidia-smi"]
-    resources:
-      limits:
-        nvidia.com/gpu: 1
+    - name: nvidia-smi
+      image: nvidia/cuda:12.2.0-base-ubuntu22.04
+      command: ["nvidia-smi"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+EOF
 ```
-
-ii. run `kubectl apply -f cuda-vectoradd.yaml`  
-iii. check logs: `kubectl logs nvidia-smi-pod`  
+ 
+ii. check logs: `kubectl logs nvidia-smi-pod 
     
 ```
     +-----------------------------------------------------------------------------------------+
