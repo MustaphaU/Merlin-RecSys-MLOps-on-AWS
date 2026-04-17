@@ -119,71 +119,71 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter --vers
 
 ### 5. Create Nodepools   
 * CPU nodepool:   
-(m5.xlarge, t3.xlarge) -> you can adjust these based on your needs)  
+("x8g.medium", "r6g.large", "x2gd.medium", "t3.xlarge") -> you can adjust these based on your needs)  
 The `consolidationPolicy` set to `WhenEmptyOrUnderutilized` in the `disruption` block configures Karpenter to reduce cluster cost by removing and replacing nodes. As a result, consolidation will terminate any empty nodes on the cluster. This behavior can be disabled by setting `consolidateAfter` to `Never`, telling Karpenter that it should never consolidate nodes.  
 **Note:** This NodePool will create capacity as long as the sum of all created capacity is less than the specified limit.  
 
-    ```bash
-    cat <<EOF | envsubst | kubectl apply -f -
-    apiVersion: karpenter.sh/v1
-    kind: NodePool
+```bash
+kubectl apply -f - <<EOF
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: cpu-node-pool
+spec:
+  limits:
+    cpu: 16
+  template:
     metadata:
-    name: cpu-node-pool
+      labels:
+        hardware-type: cpu
     spec:
-    limits:
-        cpu: 16
-    template:
-        metadata:
-        labels:
-            hardware-type: cpu
-        spec:
-        requirements:
-            - key: kubernetes.io/arch
-            operator: In
-            values: ["amd64"]
-            - key: kubernetes.io/os
-            operator: In
-            values: ["linux"]
-            - key: karpenter.sh/capacity-type
-            operator: In
-            values: ["on-demand"]
-            - key: node.kubernetes.io/instance-type
-            operator: In
-            values: ["m5.xlarge","t3.xlarge"]
-        nodeClassRef:
-            group: karpenter.k8s.aws
-            kind: EC2NodeClass
-            name: ubuntu-cpu
-    disruption:
-        consolidationPolicy: WhenEmptyOrUnderutilized
-    ---
-    apiVersion: karpenter.k8s.aws/v1
-    kind: EC2NodeClass
-    metadata:
-    name: ubuntu-cpu
-    spec:
-    role: "KarpenterNodeRole-${CLUSTER}"
-    amiFamily: Custom
-    amiSelectorTerms:
-        - id: "${UBUNTU_AMI_ID}"
-    blockDeviceMappings:
-        - deviceName: /dev/sda1
-          ebs:
-           volumeSize: 50Gi
-           volumeType: gp3
-           deleteOnTermination: true
-    subnetSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: "${CLUSTER}"
-    securityGroupSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: "${CLUSTER}"
-    userData: |
-        #!/bin/bash
-        /etc/eks/bootstrap.sh '${CLUSTER}' \
-        --kubelet-extra-args '--register-with-taints=karpenter.sh/unregistered=true:NoExecute'
-    EOF
-    ```
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values: ["x8g.medium", "r6g.large", "x2gd.medium", "t3.xlarge"]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: ubuntu-cpu
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: ubuntu-cpu
+spec:
+  role: "KarpenterNodeRole-${CLUSTER}"
+  amiFamily: Custom
+  amiSelectorTerms:
+    - id: "${UBUNTU_AMI_ID}"
+  blockDeviceMappings:
+    - deviceName: /dev/sda1
+      ebs:
+        volumeSize: 50Gi
+        volumeType: gp3
+        deleteOnTermination: true
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER}"
+  userData: |
+    #!/bin/bash
+    /etc/eks/bootstrap.sh '${CLUSTER}' --kubelet-extra-args '--register-with-taints=karpenter.sh/unregistered=true:NoExecute'
+EOF
+```
 
 * Create GPU node pool  
 ("g4dn.xlarge","g5.xlarge","g6.xlarge")  
