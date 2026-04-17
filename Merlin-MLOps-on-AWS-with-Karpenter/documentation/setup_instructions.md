@@ -521,15 +521,7 @@ done < <(aws ec2 describe-subnets \
   --output text)
 ```  
 
-e.  now create the mount targets for our EFS file system  
-    
-```bash
-    for sn in $SUBNETS; do
-    aws efs create-mount-target --file-system-id $file_system_id --subnet-id $sn --security-groups $security_group_id --region $REGION >/dev/null
-    done
-```
-
-f. optional: confirm mount targets created.
+g. optional: confirm mount targets created.
 ```bash
     aws efs describe-mount-targets --file-system-id $file_system_id --region $REGION \
     --query 'MountTargets[].{Subnet:SubnetId,AZ:AvailabilityZoneId,State:LifeCycleState,IP:IpAddress}' --output table
