@@ -83,7 +83,7 @@ managedNodeGroups:
   - instanceType: m5.large
     amiFamily: AmazonLinux2023
     name: ${CLUSTER}-ng
-    desiredCapacity: 1
+    desiredCapacity: 2
     minSize: 1
     maxSize: 10
 
