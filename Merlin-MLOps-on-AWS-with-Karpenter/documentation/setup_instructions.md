@@ -309,7 +309,7 @@ spec:
 EOF
 ```
  
-ii. check logs: `kubectl logs nvidia-smi-pod 
+ii. check logs: `kubectl logs nvidia-smi-pod`
     
 ```
     +-----------------------------------------------------------------------------------------+
@@ -332,8 +332,6 @@ ii. check logs: `kubectl logs nvidia-smi-pod
     |  No running processes found                                                             |
     +-----------------------------------------------------------------------------------------+
 ```  
-
-iv. delete pod: `kubectl delete -f cuda-vectoradd.yaml`
 
 
 ### 7. Add the EFS CSI Driver addon
