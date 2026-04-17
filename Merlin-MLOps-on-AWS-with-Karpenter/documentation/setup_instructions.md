@@ -539,37 +539,34 @@ output like:
 ```
 
 ### 11. Create the storage class and persistent volume claim. CSI dynamic provisioning creates PV automatically (reason for efs-ap provisioning mode).  
-* create yaml file: *efs-storage.yaml*
-    ```yaml
-    apiVersion: storage.k8s.io/v1
-    kind: StorageClass
-    metadata:
-    name: efs-sc
-    provisioner: efs.csi.aws.com
-    parameters:
-    provisioningMode: efs-ap         # dynamic access points
-    fileSystemId: FSID_REPLACE_ME
-    directoryPerms: "777"
-    mountOptions:
-    - tls
-    ---
-    apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-    name: my-cluster-pvc
-    spec:
-    accessModes: [ReadWriteMany]
-    storageClassName: efs-sc
-    resources:
-        requests:
-        storage: 100Gi
-    ```
+```bash
+kubectl apply -n kubeflow -f - <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: ${file_system_id}
+  directoryPerms: "777"
+mountOptions:
+  - tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-cluster-pvc
+  namespace: kubeflow
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 100Gi
+EOF
+```
     Note: `resources.capacity` is actually ignored by Amazon EFS CSI driver when provisioning the volume claim because Amazon EFS is an elastic file system. Capacity is only specified because it is a required field in Kubernetes. The value doesn't limit the size of your Amazon EFS file system.
-
-* inject file system ID into the yaml and apply the configuration. Ensure to create the PVC in kubeflow namespace so KFP pipelines, which will later be created in the same namespace, can access it.
-    ```bash
-    sed "s/FSID_REPLACE_ME/$file_system_id/g" efs-storage.yaml | kubectl apply -n kubeflow -f -
-    ```
 
 * optional: confirm sc and pvc created
     ```bash
@@ -590,7 +587,7 @@ output like:
     ```
     iii. Once inside the shell environment, test the EFS mount like so:
     ```bash
-    ls /var/lib/data && mkdir -p /var/lib/data/criteo-data && echo "EFS test successful" > /var/lib/data/criteo-data/test.txt && cat /var/lib/data/criteo-data/test.txt
+    ls /var/lib/data && mkdir -p /var/lib/data/criteo-data && echo "EFS test successful" > /var/lib/data/criteo-data/test.txt && cat /var/lib/data/criteo-data/test.txt && rm -rf /var/lib/data/criteo-data && exit
     ```
     iv. clean up
     ```bash
