@@ -154,7 +154,7 @@ def create_pipeline(data_extraction_image: str, data_validation_image: str, prep
             new_data_dir=new_data_dir
         ).set_caching_options(False).set_env_variable(name='HOME', value='/tmp')
         
-        # Add PVC mount, node selector, and service account for copy_data
+        # Add PVC mount and node selector for copy_data
         kubernetes.mount_pvc(
             copy_data_task,
             pvc_name=persistent_volume_claim_name,
