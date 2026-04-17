@@ -523,7 +523,7 @@ done < <(aws ec2 describe-subnets \
 
 g. optional: confirm mount targets created.
 ```bash
-    aws efs describe-mount-targets --file-system-id $file_system_id --region $REGION \
+    aws efs describe-mount-targets --file-system-id $file_system_id --region $AWS_DEFAULT_REGION \
     --query 'MountTargets[].{Subnet:SubnetId,AZ:AvailabilityZoneId,State:LifeCycleState,IP:IpAddress}' --output table
 ```
 output like:
