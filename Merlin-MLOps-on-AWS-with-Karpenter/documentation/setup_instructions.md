@@ -50,49 +50,45 @@ curl -fsSL https://raw.githubusercontent.com/aws/karpenter-provider-aws/v"${KARP
 
 ```bash
 eksctl create cluster -f - <<EOF
----
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
-name: ${CLUSTER}
-region: ${AWS_DEFAULT_REGION}
-version: "${K8S_VERSION}"
-tags:
+  name: ${CLUSTER}
+  region: ${AWS_DEFAULT_REGION}
+  version: "${K8S_VERSION}"
+  tags:
     karpenter.sh/discovery: ${CLUSTER}
 
 iam:
-withOIDC: true
-podIdentityAssociations:
-- namespace: "${KARPENTER_NAMESPACE}"
-    serviceAccountName: karpenter
-    roleName: ${CLUSTER}-karpenter
-    permissionPolicyARNs:
-    - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerNodeLifecyclePolicy-${CLUSTER}
-    - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerIAMIntegrationPolicy-${CLUSTER}
-    - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerEKSIntegrationPolicy-${CLUSTER}
-    - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerInterruptionPolicy-${CLUSTER}
-    - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerResourceDiscoveryPolicy-${CLUSTER}
+  withOIDC: true
+  podIdentityAssociations:
+    - namespace: "${KARPENTER_NAMESPACE}"
+      serviceAccountName: karpenter
+      roleName: ${CLUSTER}-karpenter
+      permissionPolicyARNs:
+        - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerNodeLifecyclePolicy-${CLUSTER}
+        - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerIAMIntegrationPolicy-${CLUSTER}
+        - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerEKSIntegrationPolicy-${CLUSTER}
+        - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerInterruptionPolicy-${CLUSTER}
+        - arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterControllerResourceDiscoveryPolicy-${CLUSTER}
 
 iamIdentityMappings:
-- arn: "arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/KarpenterNodeRole-${CLUSTER}"
-username: system:node:{{EC2PrivateDNSName}}
-groups:
-- system:bootstrappers
-- system:nodes
-## If you intend to run Windows workloads, the kube-proxy group should be specified.
-# For more information, see https://github.com/aws/karpenter/issues/5099.
-# - eks:kube-proxy-windows
+  - arn: "arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/KarpenterNodeRole-${CLUSTER}"
+    username: system:node:{{EC2PrivateDNSName}}
+    groups:
+      - system:bootstrappers
+      - system:nodes
 
 managedNodeGroups:
-- instanceType: m5.large
-amiFamily: AmazonLinux2023
-name: ${CLUSTER}-ng
-desiredCapacity: 1
-minSize: 1
-maxSize: 10
+  - instanceType: m5.large
+    amiFamily: AmazonLinux2023
+    name: ${CLUSTER}-ng
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 10
 
 addons:
-- name: eks-pod-identity-agent
+  - name: eks-pod-identity-agent
 EOF
 ```
 
