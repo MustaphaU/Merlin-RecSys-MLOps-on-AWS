@@ -188,72 +188,71 @@ EOF
 * Create GPU node pool  
 ("g4dn.xlarge","g5.xlarge","g6.xlarge")  
 
-    ```bash
-    cat <<EOF | envsubst | kubectl apply -f -
-    apiVersion: karpenter.sh/v1
-    kind: NodePool
+```bash
+kubectl apply -f - <<EOF
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: gpu-node-pool
+spec:
+  limits:
+    cpu: 16
+  template:
     metadata:
-    name: gpu-node-pool
+      labels:
+        hardware-type: gpu
     spec:
-    limits:
-        cpu: 16
-    template:
-        metadata:
-        labels:
-            hardware-type: gpu
-        spec:
-        taints:
-            - key: nvidia.com/gpu
-            value: "present"
-            effect: NoSchedule
-        requirements:
-            - key: kubernetes.io/arch
-            operator: In
-            values: ["amd64"]
-            - key: kubernetes.io/os
-            operator: In
-            values: ["linux"]
-            - key: karpenter.sh/capacity-type
-            operator: In
-            values: ["on-demand"]
-            - key: node.kubernetes.io/instance-type
-            operator: In
-            values: ["g4dn.xlarge","g5.xlarge","g6.xlarge"]
-        nodeClassRef:
-            group: karpenter.k8s.aws
-            kind: EC2NodeClass
-            name: ubuntu-gpu
-    disruption:
-        consolidationPolicy: WhenEmptyOrUnderutilized
-        consolidateAfter: 1m
-    ---
-    apiVersion: karpenter.k8s.aws/v1
-    kind: EC2NodeClass
-    metadata:
-    name: ubuntu-gpu
-    spec:
-    role: "KarpenterNodeRole-${CLUSTER}"
-    amiFamily: Custom
-    amiSelectorTerms:
-        - id: "${UBUNTU_AMI_ID}"
-    blockDeviceMappings:
-        - deviceName: /dev/sda1
-            ebs:
-             volumeSize: 100Gi
-             volumeType: gp3
-             deleteOnTermination: true
-    subnetSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: "${CLUSTER}"
-    securityGroupSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: "${CLUSTER}"
-    userData: |
-        #!/bin/bash
-        /etc/eks/bootstrap.sh '${CLUSTER}' \
-        --kubelet-extra-args '--register-with-taints=karpenter.sh/unregistered=true:NoExecute'
-    EOF
-    ```
+      taints:
+        - key: nvidia.com/gpu
+          value: "present"
+          effect: NoSchedule
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values: ["g4dn.xlarge", "g5.xlarge", "g6.xlarge"]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: ubuntu-gpu
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: ubuntu-gpu
+spec:
+  role: "KarpenterNodeRole-${CLUSTER}"
+  amiFamily: Custom
+  amiSelectorTerms:
+    - id: "${UBUNTU_AMI_ID}"
+  blockDeviceMappings:
+    - deviceName: /dev/sda1
+      ebs:
+        volumeSize: 100Gi
+        volumeType: gp3
+        deleteOnTermination: true
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER}"
+  userData: |
+    #!/bin/bash
+    /etc/eks/bootstrap.sh '${CLUSTER}' --kubelet-extra-args '--register-with-taints=karpenter.sh/unregistered=true:NoExecute'
+EOF
+```
 
 ### 6. Install NVIDIA GPU Operator
 
