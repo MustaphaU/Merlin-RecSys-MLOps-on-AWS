@@ -345,9 +345,9 @@ c. create an EFS for the EKS cluster
     name: efs-sc
     provisioner: efs.csi.aws.com
     parameters:
-    provisioningMode: efs-ap         # dynamic access points
-    fileSystemId: FSID_REPLACE_ME #you may replace to make less permissive
-    directoryPerms: "777"
+    provisioningMode: efs-ap         
+    fileSystemId: FSID_REPLACE_ME 
+    directoryPerms: "777" #you may replace to make less permissive
     mountOptions:
     - tls
     ---
@@ -362,7 +362,7 @@ c. create an EFS for the EKS cluster
         requests:
         storage: 100Gi
     ```
-    Note: `resources.capacity` is actually ignored by Amazon EFS CSI driver when provisioning the volume claim because Amazon EFS is an elastic file system. Only specified because it is a required field in Kubernetes. Point is, the value doesn't limit the size of your Amazon EFS file system.
+    Note: `resources.capacity` is actually ignored by Amazon EFS CSI driver when provisioning the volume claim because Amazon EFS is an elastic file system. Only specified because it is a required field in Kubernetes. Point is, the value doesn't limit the size of the volume.
 
 * inject file system ID into the yaml and apply the configuration. Ensure to create the PVC in kubeflow namespace so kfp pipeline can access it.
     ```bash
