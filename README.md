@@ -28,9 +28,9 @@ There are two variants of this project based on the autoscaling product.
     ![Autoscaling with Cluster Autoscaler and k8s HPA](images/Cluster_Autoscaling.png)
 
 ## Acknowledgements
-This work was inspired by [Merlin MLOps with Kubeflow Pipelines on Google Kubernetes Engine](https://developer.nvidia.com/blog/continuously-improving-recommender-systems-for-competitive-advantage-with-merlin-and-mlops/); in fact, it is an adaptation of the [Merlin - MLOps on GKE project on GitHub](https://github.com/NVIDIA-Merlin/gcp-ml-ops?tab=readme-ov-file#merlin---mlops-on-gke) for deployment on Amazon EKS. Therefore, you will find that some of the ideas in the referenced project are replicated in this implementation and most of the code has been reused but updated to use AWS and to work with updated SDKs.
+This work was partly inspired by [Merlin MLOps with Kubeflow Pipelines on Google Kubernetes Engine](https://developer.nvidia.com/blog/continuously-improving-recommender-systems-for-competitive-advantage-with-merlin-and-mlops/). Therefore, you will find that some of the ideas in the referenced project are replicated in this implementation but updated to use Amazon EKS and other services on AWS like SQS, EFS, S3, etc. Also, the autoscaling was replaced with the two approaches referenced above.
 
-## References
+## Resources
 
 1. [Continuously Improving Recommender Systems for Competitive Advantage Using NVIDIA Merlin and MLOps by Shashank Verma, Abhishek Sawarkar, Vinh Nguyen, and Davide Onofrio](https://developer.nvidia.com/blog/continuously-improving-recommender-systems-for-competitive-advantage-with-merlin-and-mlops/)
 2. [Merlin - MLOps on GKE](https://github.com/NVIDIA-Merlin/gcp-ml-ops?tab=readme-ov-file#merlin---mlops-on-gke)
